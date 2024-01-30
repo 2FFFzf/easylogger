@@ -1,4 +1,4 @@
-module easylogger
+module github.com/2FFFzf/easylogger
 
 go 1.21.3
 
