@@ -40,13 +40,13 @@ func InitLogger(config string) error {
 				MaxAge:   lage,
 				Compress: true,
 			}
-			zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+			// zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 			writerConsole := zerolog.ConsoleWriter{Out: os.Stdout}
 
 			fileLogger := zerolog.New(lloger).With().Timestamp().Logger()
 			multilogger := zerolog.MultiLevelWriter(fileLogger, writerConsole)
-			log.Logger = zerolog.New(multilogger).With().Timestamp().Logger()
+			log.Logger = zerolog.New(multilogger)
 			return nil
 		}
 	}
