@@ -40,7 +40,7 @@ func InitLogger(config string) error {
 				MaxAge:   lage,
 				Compress: true,
 			}
-			zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+			zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 			writerConsole := zerolog.ConsoleWriter{Out: os.Stdout}
 
