@@ -1,9 +1,9 @@
 package easylogger
 
 import (
-	"errors"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
@@ -11,13 +11,40 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// default value : name : app.log, max file size :  200MB, max file age : 28 day
 func InitLogger(config string) error {
 	if config == "" {
-		return errors.New("No config found")
+		lloger := &lumberjack.Logger{
+			Filename: "app.log",
+			MaxSize:  200,
+			MaxAge:   28,
+			Compress: true,
+		}
+		writerConsole := zerolog.ConsoleWriter{Out: os.Stdout}
+		multilogger := zerolog.MultiLevelWriter(lloger, writerConsole)
+		log.Logger = zerolog.New(multilogger)
+		zerolog.TimeFieldFormat = time.RFC822
+		log.Logger = log.With().Timestamp().Logger()
+
+		log.Info().Msg("Rotary Logger")
+		return nil
 	} else {
 		er := godotenv.Load("log.env")
 		if er != nil {
-			return er
+			//if failed to open use default value
+			lloger := &lumberjack.Logger{
+				Filename: "app.log",
+				MaxSize:  200,
+				MaxAge:   28,
+				Compress: true,
+			}
+			writerConsole := zerolog.ConsoleWriter{Out: os.Stdout}
+			multilogger := zerolog.MultiLevelWriter(lloger, writerConsole)
+			log.Logger = zerolog.New(multilogger)
+			zerolog.TimeFieldFormat = time.RFC822
+			log.Logger = log.With().Timestamp().Logger()
+			log.Error().Err(er).Stack().Caller().Msg("hala")
+			return nil
 		} else {
 			logfile := os.Getenv("LOG_LOCATION")
 			if logfile == "" {
@@ -26,8 +53,8 @@ func InitLogger(config string) error {
 			logsize := os.Getenv("LOG_MAX_SIZE")
 			lsize, err := strconv.Atoi(logsize)
 			if err != nil {
-				// default log sizze 100 MB before rotary
-				lsize = 100
+				// default log sizze 200 MB before rotary
+				lsize = 200
 			}
 			logage := os.Getenv("LOG_AGE")
 			lage, er := strconv.Atoi(logage)
@@ -44,9 +71,11 @@ func InitLogger(config string) error {
 
 			writerConsole := zerolog.ConsoleWriter{Out: os.Stdout}
 
-			fileLogger := zerolog.New(lloger).With().Timestamp().Logger()
-			multilogger := zerolog.MultiLevelWriter(fileLogger, writerConsole)
+			multilogger := zerolog.MultiLevelWriter(lloger, writerConsole)
 			log.Logger = zerolog.New(multilogger)
+			zerolog.TimeFieldFormat = time.RFC822
+			log.Logger = log.With().Timestamp().Logger()
+			log.Info().Msg("Rotary Logger")
 			return nil
 		}
 	}
